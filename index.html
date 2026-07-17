@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>出勤カレンダー</title>
 
 <style>
+
 body{
     font-family:sans-serif;
     background:#f2f2f2;
@@ -18,14 +20,34 @@ body{
     margin:auto;
 }
 
+.control{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+}
+
 h1{
     text-align:center;
 }
 
+button{
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    background:#333;
+    color:white;
+}
+
+select{
+    padding:8px;
+    border-radius:8px;
+}
+
 .info{
     text-align:center;
-    font-size:20px;
-    margin:15px 0;
+    font-size:18px;
+    margin:15px;
 }
 
 .calendar{
@@ -35,55 +57,93 @@ h1{
 }
 
 .week{
-    font-weight:bold;
     text-align:center;
-    padding:10px;
+    font-weight:bold;
 }
 
 .day{
+
     background:white;
-    height:70px;
+    height:60px;
+
     display:flex;
     justify-content:center;
     align-items:center;
+
     border-radius:10px;
+
     cursor:pointer;
-    user-select:none;
+
     box-shadow:0 2px 5px rgba(0,0,0,.15);
-    transition:.2s;
 }
 
-.day:hover{
-    transform:scale(1.05);
-}
 
 .work{
     background:#4CAF50;
     color:white;
 }
 
+
 .rest{
     background:#f44336;
     color:white;
 }
 
+
 .empty{
     visibility:hidden;
 }
+
 </style>
 
 </head>
 
+
 <body>
+
 
 <div class="container">
 
-<h1>2026年7月</h1>
+
+<div class="control">
+
+<button onclick="changeMonth(-1)">◀</button>
+
+<h1 id="title"></h1>
+
+<button onclick="changeMonth(1)">▶</button>
+
+</div>
+
+
+<div style="text-align:center">
+
+締め日：
+
+<select id="closing">
+
+<option value="5">5日</option>
+<option value="10">10日</option>
+<option value="15">15日</option>
+<option value="20">20日</option>
+<option value="25">25日</option>
+<option value="31" selected>月末</option>
+
+</select>
+
+</div>
+
 
 <div class="info">
-出勤：<span id="workCount">0</span>日　
-休み：<span id="restCount">0</span>日
+
+🟢出勤：
+<span id="workCount">0</span>日　
+
+🔴休み：
+<span id="restCount">0</span>日
+
 </div>
+
 
 <div class="calendar" id="calendar">
 
@@ -97,77 +157,224 @@ h1{
 
 </div>
 
-</div>
 
+</div>
 <script>
 
-const calendar=document.getElementById("calendar");
+let currentDate = new Date();
 
-const workCount=document.getElementById("workCount");
+let records = JSON.parse(
+    localStorage.getItem("workRecords")
+) || {};
 
-const restCount=document.getElementById("restCount");
+const calendar = document.getElementById("calendar");
 
-let work=0;
-let rest=0;
+const title = document.getElementById("title");
 
-// 2026年7月は水曜日開始
-for(let i=0;i<3;i++){
-    const e=document.createElement("div");
-    e.className="empty";
-    calendar.appendChild(e);
+const workCount = document.getElementById("workCount");
+
+const restCount = document.getElementById("restCount");
+
+
+
+// 月移動
+function changeMonth(num){
+
+    currentDate.setMonth(
+        currentDate.getMonth()+num
+    );
+
+    drawCalendar();
+
 }
 
-for(let i=1;i<=31;i++){
 
-    const d=document.createElement("div");
 
-    d.className="day";
+// カレンダー表示
+function drawCalendar(){
 
-    d.textContent=i;
 
-    d.dataset.state="0";
+    // 日付だけ削除
+    while(calendar.children.length > 7){
 
-    d.onclick=function(){
+        calendar.removeChild(
+            calendar.lastChild
+        );
 
-        if(d.dataset.state=="0"){
+    }
 
-            d.dataset.state="1";
+
+    let year = currentDate.getFullYear();
+
+    let month = currentDate.getMonth();
+
+
+    title.textContent =
+        year + "年" + (month+1) + "月";
+
+
+
+    // 月初の曜日
+    let first =
+        new Date(year,month,1).getDay();
+
+
+
+    for(let i=0;i<first;i++){
+
+        let e=document.createElement("div");
+
+        e.className="empty";
+
+        calendar.appendChild(e);
+
+    }
+
+
+
+    // 日数
+    let days =
+        new Date(year,month+1,0).getDate();
+
+
+
+    for(let i=1;i<=days;i++){
+
+
+        let d=document.createElement("div");
+
+        d.className="day";
+
+        d.textContent=i;
+
+
+
+        let key =
+        `${year}-${month+1}-${i}`;
+
+
+
+        d.dataset.state =
+        records[key] || "0";
+
+
+
+        if(d.dataset.state==="1"){
 
             d.className="day work";
 
-            work++;
+        }
 
-        }else if(d.dataset.state=="1"){
 
-            d.dataset.state="2";
+        if(d.dataset.state==="2"){
 
             d.className="day rest";
 
-            work--;
-
-            rest++;
-
-        }else{
-
-            d.dataset.state="0";
-
-            d.className="day";
-
-            rest--;
-
         }
 
-        workCount.textContent=work;
 
-        restCount.textContent=rest;
 
-    };
 
-    calendar.appendChild(d);
+        d.onclick=function(){
+
+
+
+            if(d.dataset.state==="0"){
+
+
+                d.dataset.state="1";
+
+                d.className="day work";
+
+
+            }else if(d.dataset.state==="1"){
+
+
+                d.dataset.state="2";
+
+                d.className="day rest";
+
+
+            }else{
+
+
+                d.dataset.state="0";
+
+                d.className="day";
+
+
+            }
+
+
+
+            // 保存
+            records[key]=d.dataset.state;
+
+
+            localStorage.setItem(
+                "workRecords",
+                JSON.stringify(records)
+            );
+
+
+            count();
+
+
+        };
+
+
+
+        calendar.appendChild(d);
+
+    }
+
+
+    count();
+
 
 }
 
+
+
+
+// 集計
+function count(){
+
+
+    let work=0;
+
+    let rest=0;
+
+
+
+    Object.values(records).forEach(v=>{
+
+
+        if(v==="1") work++;
+
+        if(v==="2") rest++;
+
+
+    });
+
+
+
+    workCount.textContent=work;
+
+    restCount.textContent=rest;
+
+
+}
+
+
+
+
+drawCalendar();
+
+
 </script>
 
+
 </body>
+
 </html>
