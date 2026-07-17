@@ -8,133 +8,99 @@
 
 <title>出勤管理</title>
 
-
 <style>
 
 body{
-    font-family:sans-serif;
-    background:#f2f2f2;
-    margin:0;
-    padding:20px;
+font-family:sans-serif;
+background:#f2f2f2;
+padding:20px;
 }
-
 
 .container{
-    max-width:700px;
-    margin:auto;
+max-width:700px;
+margin:auto;
 }
-
 
 .header{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:15px;
+display:flex;
+justify-content:center;
+align-items:center;
+gap:15px;
 }
-
 
 button{
-    padding:8px 15px;
-    border:0;
-    border-radius:8px;
-    background:#333;
-    color:white;
+padding:8px 12px;
+border:none;
+border-radius:8px;
+background:#333;
+color:white;
 }
-
-
-h1{
-    font-size:22px;
-}
-
-
-.setting{
-    text-align:center;
-    margin:15px 0;
-}
-
 
 select{
-    padding:8px;
-    border-radius:8px;
+padding:8px;
+border-radius:8px;
 }
-
-
-.period{
-    text-align:center;
-    font-weight:bold;
-    margin:10px;
-}
-
 
 .info{
-    text-align:center;
-    font-size:18px;
-    margin:15px;
+text-align:center;
+font-size:18px;
+margin:15px;
 }
 
+.period{
+text-align:center;
+font-weight:bold;
+}
 
 .calendar{
-
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-    gap:8px;
-
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:8px;
 }
-
 
 .week{
-
-    text-align:center;
-    font-weight:bold;
-
+text-align:center;
+font-weight:bold;
 }
-
 
 .day{
-
-    background:white;
-    height:65px;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-    box-shadow:0 2px 5px rgba(0,0,0,.15);
-
-    font-size:14px;
-
+height:65px;
+background:white;
+border-radius:10px;
+display:flex;
+justify-content:center;
+align-items:center;
+cursor:pointer;
+box-shadow:0 2px 5px rgba(0,0,0,.15);
+font-size:14px;
 }
-
 
 .work{
-
-    background:#4CAF50;
-    color:white;
-
+background:#4CAF50;
+color:white;
 }
-
 
 .rest{
-
-    background:#f44336;
-    color:white;
-
+background:#f44336;
+color:white;
 }
 
+.overtime{
+background:#ff9800;
+color:white;
+}
 
 .empty{
-
-    visibility:hidden;
-
+visibility:hidden;
 }
 
+.overMenu{
+display:none;
+text-align:center;
+margin:15px;
+}
 
 </style>
-
 
 </head>
 
@@ -145,12 +111,11 @@ select{
 <div class="container">
 
 
-
 <div class="header">
 
 <button onclick="changePeriod(-1)">◀</button>
 
-<h1 id="title"></h1>
+<h2 id="title"></h2>
 
 <button onclick="changePeriod(1)">▶</button>
 
@@ -158,27 +123,20 @@ select{
 
 
 
-<div class="setting">
+<div style="text-align:center">
 
-
-締め日：
+締め日
 
 <select id="closing" onchange="changeClosing()">
 
 <option value="5">5日締め</option>
-
 <option value="10">10日締め</option>
-
 <option value="15" selected>15日締め</option>
-
 <option value="20">20日締め</option>
-
 <option value="25">25日締め</option>
-
 <option value="31">月末締め</option>
 
 </select>
-
 
 </div>
 
@@ -194,8 +152,26 @@ select{
 <span id="workCount">0</span>日　
 
 🔴休み
-<span id="restCount">0</span>日
+<span id="restCount">0</span>日　
 
+🟡残業
+<span id="overCount">0</span>時間
+
+</div>
+
+
+
+<div class="overMenu" id="overMenu">
+
+残業時間を選択
+
+<br>
+
+<button onclick="setOver(1)">1h</button>
+<button onclick="setOver(2)">2h</button>
+<button onclick="setOver(3)">3h</button>
+<button onclick="setOver(4)">4h</button>
+<button onclick="setOver(5)">5h</button>
 
 </div>
 
@@ -203,21 +179,13 @@ select{
 
 <div class="calendar" id="calendar">
 
-
 <div class="week">日</div>
-
 <div class="week">月</div>
-
 <div class="week">火</div>
-
 <div class="week">水</div>
-
 <div class="week">木</div>
-
 <div class="week">金</div>
-
 <div class="week">土</div>
-
 
 </div>
 
@@ -236,12 +204,31 @@ let records = JSON.parse(
 ) || {};
 
 
+// 選択中の日付
+let selectedKey = null;
 
-const calendar = document.getElementById("calendar");
-const title = document.getElementById("title");
-const period = document.getElementById("period");
-const workCount = document.getElementById("workCount");
-const restCount = document.getElementById("restCount");
+
+const calendar =
+document.getElementById("calendar");
+
+const title =
+document.getElementById("title");
+
+const period =
+document.getElementById("period");
+
+const workCount =
+document.getElementById("workCount");
+
+const restCount =
+document.getElementById("restCount");
+
+const overCount =
+document.getElementById("overCount");
+
+const overMenu =
+document.getElementById("overMenu");
+
 
 
 
@@ -259,7 +246,7 @@ function changeClosing(){
 
 
 
-// 給料期間移動
+// 期間移動
 function changePeriod(num){
 
     targetDate.setMonth(
@@ -273,16 +260,16 @@ function changePeriod(num){
 
 
 
-// 期間取得
+
+// 締め期間取得
 function getRange(){
 
 
-    let year =
+    let y =
     targetDate.getFullYear();
 
-    let month =
+    let m =
     targetDate.getMonth();
-
 
 
     let start;
@@ -290,15 +277,15 @@ function getRange(){
 
 
 
-    if(closingDay == 31){
+    if(closingDay==31){
 
 
         start =
-        new Date(year,month,1);
+        new Date(y,m,1);
 
 
         end =
-        new Date(year,month+1,0);
+        new Date(y,m+1,0);
 
 
 
@@ -306,19 +293,11 @@ function getRange(){
 
 
         end =
-        new Date(
-            year,
-            month,
-            closingDay
-        );
+        new Date(y,m,closingDay);
 
 
         start =
-        new Date(
-            year,
-            month-1,
-            closingDay+1
-        );
+        new Date(y,m-1,closingDay+1);
 
 
     }
@@ -326,11 +305,12 @@ function getRange(){
 
 
     return {
-        start:start,
-        end:end
+        start,
+        end
     };
 
 }
+
 
 
 
@@ -339,8 +319,7 @@ function getRange(){
 function draw(){
 
 
-
-    while(calendar.children.length > 7){
+    while(calendar.children.length>7){
 
         calendar.removeChild(
             calendar.lastChild
@@ -350,7 +329,7 @@ function draw(){
 
 
 
-    let range = getRange();
+    let range=getRange();
 
 
 
@@ -365,7 +344,7 @@ function draw(){
     period.textContent =
     "期間："
     +format(range.start)
-    +" ～ "
+    +"〜"
     +format(range.end);
 
 
@@ -378,7 +357,6 @@ function draw(){
 
     for(let i=0;i<first;i++){
 
-
         let e=document.createElement("div");
 
         e.className="empty";
@@ -390,21 +368,19 @@ function draw(){
 
 
 
+
     let date =
     new Date(range.start);
 
 
 
-    while(date <= range.end){
+    while(date<=range.end){
 
 
 
-        let d =
-        document.createElement("div");
-
+        let d=document.createElement("div");
 
         d.className="day";
-
 
 
         let key =
@@ -420,24 +396,29 @@ function draw(){
 
 
 
+        let data =
+        records[key] || {
+            state:"0",
+            over:0
+        };
+
+
+
         d.dataset.state =
-        records[key] || "0";
+        data.state;
 
 
 
-
-        if(d.dataset.state=="1"){
-
+        if(data.state=="1")
             d.className="day work";
 
-        }
 
-
-        if(d.dataset.state=="2"){
-
+        if(data.state=="2")
             d.className="day rest";
 
-        }
+
+        if(data.state=="3")
+            d.className="day overtime";
 
 
 
@@ -445,48 +426,54 @@ function draw(){
         d.onclick=function(){
 
 
-
-            if(d.dataset.state=="0"){
-
-
-                d.dataset.state="1";
-
-                d.className="day work";
+            selectedKey=key;
 
 
-            }else if(d.dataset.state=="1"){
+
+            overMenu.style.display="block";
 
 
-                d.dataset.state="2";
 
-                d.className="day rest";
+            if(data.state=="0"){
+
+
+                data.state="1";
+
+
+            }else if(data.state=="1"){
+
+
+                data.state="2";
+
+
+            }else if(data.state=="2"){
+
+
+                data.state="3";
 
 
             }else{
 
 
-                d.dataset.state="0";
+                data.state="0";
 
-                d.className="day";
+                data.over=0;
 
 
             }
 
 
 
-            records[key]=d.dataset.state;
+
+            records[key]=data;
 
 
 
-            localStorage.setItem(
-                "workRecords",
-                JSON.stringify(records)
-            );
+            save();
 
 
 
-            count();
-
+            draw();
 
 
         };
@@ -501,14 +488,71 @@ function draw(){
             date.getDate()+1
         );
 
-
     }
 
 
 
     count();
 
+
 }
+
+
+
+
+
+// 残業時間設定
+function setOver(hour){
+
+
+    if(selectedKey==null)
+        return;
+
+
+
+    if(!records[selectedKey]){
+
+        records[selectedKey]={
+            state:"3",
+            over:0
+        };
+
+    }
+
+
+
+    records[selectedKey].state="3";
+
+    records[selectedKey].over=hour;
+
+
+
+    save();
+
+
+
+    overMenu.style.display="none";
+
+
+    draw();
+
+
+}
+
+
+
+
+
+// 保存
+function save(){
+
+    localStorage.setItem(
+        "workRecords",
+        JSON.stringify(records)
+    );
+
+}
+
 
 
 
@@ -517,10 +561,11 @@ function draw(){
 function count(){
 
 
-
     let work=0;
 
     let rest=0;
+
+    let over=0;
 
 
     let range=getRange();
@@ -530,27 +575,23 @@ function count(){
     Object.keys(records).forEach(key=>{
 
 
-        let date =
-        new Date(key);
+        let d=new Date(key);
 
 
 
-        if(date>=range.start && date<=range.end){
+        if(d>=range.start && d<=range.end){
 
 
-
-            if(records[key]=="1"){
-
+            if(records[key].state=="1")
                 work++;
 
-            }
 
-
-            if(records[key]=="2"){
-
+            if(records[key].state=="2")
                 rest++;
 
-            }
+
+            if(records[key].state=="3")
+                over += Number(records[key].over);
 
 
         }
@@ -564,6 +605,8 @@ function count(){
 
     restCount.textContent=rest;
 
+    overCount.textContent=over;
+
 
 }
 
@@ -573,11 +616,11 @@ function count(){
 // 保存用日付
 function makeKey(date){
 
-    return date.getFullYear()
-    +"-"
-    +(date.getMonth()+1)
-    +"-"
-    +date.getDate();
+return date.getFullYear()
++"-"
++(date.getMonth()+1)
++"-"
++date.getDate();
 
 }
 
@@ -586,15 +629,14 @@ function makeKey(date){
 // 表示用
 function format(date){
 
-    return date.getFullYear()
-    +"年"
-    +(date.getMonth()+1)
-    +"月"
-    +date.getDate()
-    +"日";
+return date.getFullYear()
++"年"
++(date.getMonth()+1)
++"月"
++date.getDate()
++"日";
 
 }
-
 
 
 
