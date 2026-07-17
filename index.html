@@ -11,94 +11,121 @@
 <style>
 
 body{
-font-family:sans-serif;
-background:#f2f2f2;
-padding:20px;
+    font-family:sans-serif;
+    background:#f2f2f2;
+    padding:20px;
 }
+
 
 .container{
-max-width:700px;
-margin:auto;
+    max-width:700px;
+    margin:auto;
 }
+
 
 .header{
-display:flex;
-justify-content:center;
-align-items:center;
-gap:15px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
 }
+
 
 button{
-padding:8px 12px;
-border:none;
-border-radius:8px;
-background:#333;
-color:white;
+    padding:8px 12px;
+    border:none;
+    border-radius:8px;
+    background:#333;
+    color:white;
 }
+
 
 select{
-padding:8px;
-border-radius:8px;
+    padding:8px;
+    border-radius:8px;
 }
 
-.info{
-text-align:center;
-font-size:18px;
-margin:15px;
-}
 
 .period{
-text-align:center;
-font-weight:bold;
+    text-align:center;
+    font-weight:bold;
+    margin:10px;
 }
+
+
+.info{
+    text-align:center;
+    font-size:18px;
+    margin:15px;
+}
+
 
 .calendar{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:8px;
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
 }
+
 
 .week{
-text-align:center;
-font-weight:bold;
+    text-align:center;
+    font-weight:bold;
 }
+
 
 .day{
-height:65px;
-background:white;
-border-radius:10px;
-display:flex;
-justify-content:center;
-align-items:center;
-cursor:pointer;
-box-shadow:0 2px 5px rgba(0,0,0,.15);
-font-size:14px;
+
+    height:65px;
+    background:white;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    box-shadow:0 2px 5px rgba(0,0,0,.15);
+
+    font-size:14px;
+
 }
+
 
 .work{
-background:#4CAF50;
-color:white;
+    background:#4CAF50;
+    color:white;
 }
+
 
 .rest{
-background:#f44336;
-color:white;
+    background:#f44336;
+    color:white;
 }
+
 
 .overtime{
-background:#ff9800;
-color:white;
+    background:#ff9800;
+    color:white;
 }
+
 
 .empty{
-visibility:hidden;
+    visibility:hidden;
 }
 
+
 .overMenu{
-display:none;
-text-align:center;
-margin:15px;
+
+    display:none;
+
+    text-align:center;
+
+    margin:15px;
+
 }
+
 
 </style>
 
@@ -123,30 +150,38 @@ margin:15px;
 
 
 
-<div style="text-align:center">
+<div style="text-align:center;margin:15px;">
+
 
 締め日
 
 <select id="closing" onchange="changeClosing()">
 
 <option value="5">5日締め</option>
+
 <option value="10">10日締め</option>
+
 <option value="15" selected>15日締め</option>
+
 <option value="20">20日締め</option>
+
 <option value="25">25日締め</option>
+
 <option value="31">月末締め</option>
 
 </select>
+
 
 </div>
 
 
 
-<div class="period" id="period"></div>
+<div id="period" class="period"></div>
 
 
 
 <div class="info">
+
 
 🟢出勤
 <span id="workCount">0</span>日　
@@ -157,35 +192,54 @@ margin:15px;
 🟡残業
 <span id="overCount">0</span>時間
 
-</div>
-
-
-
-<div class="overMenu" id="overMenu">
-
-残業時間を選択
-
-<br>
-
-<button onclick="setOver(1)">1h</button>
-<button onclick="setOver(2)">2h</button>
-<button onclick="setOver(3)">3h</button>
-<button onclick="setOver(4)">4h</button>
-<button onclick="setOver(5)">5h</button>
 
 </div>
+
+
+
+
+<div id="overMenu" class="overMenu">
+
+
+残業時間
+
+
+<br><br>
+
+
+<button onclick="setOver(1)">1時間</button>
+
+<button onclick="setOver(2)">2時間</button>
+
+<button onclick="setOver(3)">3時間</button>
+
+<button onclick="setOver(4)">4時間</button>
+
+<button onclick="setOver(5)">5時間</button>
+
+
+</div>
+
 
 
 
 <div class="calendar" id="calendar">
 
+
 <div class="week">日</div>
+
 <div class="week">月</div>
+
 <div class="week">火</div>
+
 <div class="week">水</div>
+
 <div class="week">木</div>
+
 <div class="week">金</div>
+
 <div class="week">土</div>
+
 
 </div>
 
@@ -198,37 +252,24 @@ let targetDate = new Date();
 let closingDay = 15;
 
 
-// 保存データ
+// 保存データ読み込み
 let records = JSON.parse(
     localStorage.getItem("workRecords")
 ) || {};
 
 
-// 選択中の日付
 let selectedKey = null;
 
 
-const calendar =
-document.getElementById("calendar");
+const calendar = document.getElementById("calendar");
+const title = document.getElementById("title");
+const period = document.getElementById("period");
 
-const title =
-document.getElementById("title");
+const workCount = document.getElementById("workCount");
+const restCount = document.getElementById("restCount");
+const overCount = document.getElementById("overCount");
 
-const period =
-document.getElementById("period");
-
-const workCount =
-document.getElementById("workCount");
-
-const restCount =
-document.getElementById("restCount");
-
-const overCount =
-document.getElementById("overCount");
-
-const overMenu =
-document.getElementById("overMenu");
-
+const overMenu = document.getElementById("overMenu");
 
 
 
@@ -245,8 +286,7 @@ function changeClosing(){
 
 
 
-
-// 期間移動
+// 月移動
 function changePeriod(num){
 
     targetDate.setMonth(
@@ -259,49 +299,32 @@ function changePeriod(num){
 
 
 
-
-
-// 締め期間取得
+// 締め期間
 function getRange(){
 
+    let y = targetDate.getFullYear();
 
-    let y =
-    targetDate.getFullYear();
-
-    let m =
-    targetDate.getMonth();
+    let m = targetDate.getMonth();
 
 
     let start;
     let end;
 
 
+    if(closingDay == 31){
 
-    if(closingDay==31){
+        start = new Date(y,m,1);
 
-
-        start =
-        new Date(y,m,1);
-
-
-        end =
-        new Date(y,m+1,0);
-
+        end = new Date(y,m+1,0);
 
 
     }else{
 
+        end = new Date(y,m,closingDay);
 
-        end =
-        new Date(y,m,closingDay);
-
-
-        start =
-        new Date(y,m-1,closingDay+1);
-
+        start = new Date(y,m-1,closingDay+1);
 
     }
-
 
 
     return {
@@ -319,7 +342,7 @@ function getRange(){
 function draw(){
 
 
-    while(calendar.children.length>7){
+    while(calendar.children.length > 7){
 
         calendar.removeChild(
             calendar.lastChild
@@ -328,9 +351,7 @@ function draw(){
     }
 
 
-
-    let range=getRange();
-
+    let range = getRange();
 
 
     title.textContent =
@@ -344,7 +365,7 @@ function draw(){
     period.textContent =
     "期間："
     +format(range.start)
-    +"〜"
+    +" ～ "
     +format(range.end);
 
 
@@ -368,13 +389,11 @@ function draw(){
 
 
 
-
-    let date =
-    new Date(range.start);
+    let date = new Date(range.start);
 
 
 
-    while(date<=range.end){
+    while(date <= range.end){
 
 
 
@@ -383,42 +402,67 @@ function draw(){
         d.className="day";
 
 
-        let key =
-        makeKey(date);
+
+        let key = makeKey(date);
 
 
 
         d.textContent =
         (date.getMonth()+1)
         +"月"
-        +date.getDate()
-        +"日";
+        +date.getDate();
 
 
 
-        let data =
-        records[key] || {
-            state:"0",
-            over:0
-        };
+
+        // 古いデータ対応
+        let data = records[key];
+
+
+        if(typeof data === "string"){
+
+            data={
+                state:data,
+                over:0
+            };
+
+            records[key]=data;
+
+        }
 
 
 
-        d.dataset.state =
-        data.state;
+        if(!data){
+
+            data={
+                state:"0",
+                over:0
+            };
+
+        }
 
 
 
-        if(data.state=="1")
+
+        if(data.state=="1"){
+
             d.className="day work";
 
+        }
 
-        if(data.state=="2")
+
+        if(data.state=="2"){
+
             d.className="day rest";
 
+        }
 
-        if(data.state=="3")
+
+        if(data.state=="3"){
+
             d.className="day overtime";
+
+        }
 
 
 
@@ -426,54 +470,48 @@ function draw(){
         d.onclick=function(){
 
 
-            selectedKey=key;
+
+            selectedKey = key;
 
 
 
-            overMenu.style.display="block";
-
-
+            // 状態変更
 
             if(data.state=="0"){
-
 
                 data.state="1";
 
 
             }else if(data.state=="1"){
 
-
                 data.state="2";
 
 
             }else if(data.state=="2"){
 
-
                 data.state="3";
+
+                overMenu.style.display="block";
 
 
             }else{
-
 
                 data.state="0";
 
                 data.over=0;
 
-
             }
-
 
 
 
             records[key]=data;
 
 
-
             save();
 
 
-
             draw();
+
 
 
         };
@@ -488,8 +526,8 @@ function draw(){
             date.getDate()+1
         );
 
-    }
 
+    }
 
 
     count();
@@ -500,12 +538,11 @@ function draw(){
 
 
 
-
 // 残業時間設定
 function setOver(hour){
 
 
-    if(selectedKey==null)
+    if(!selectedKey)
         return;
 
 
@@ -528,7 +565,6 @@ function setOver(hour){
 
 
     save();
-
 
 
     overMenu.style.display="none";
@@ -575,23 +611,38 @@ function count(){
     Object.keys(records).forEach(key=>{
 
 
-        let d=new Date(key);
+        let date = new Date(key);
 
 
 
-        if(d>=range.start && d<=range.end){
+        if(date>=range.start && date<=range.end){
 
 
-            if(records[key].state=="1")
+            let data=records[key];
+
+
+            // 古いデータ対策
+            if(typeof data==="string"){
+
+                data={
+                    state:data,
+                    over:0
+                };
+
+            }
+
+
+
+            if(data.state=="1")
                 work++;
 
 
-            if(records[key].state=="2")
+            if(data.state=="2")
                 rest++;
 
 
-            if(records[key].state=="3")
-                over += Number(records[key].over);
+            if(data.state=="3")
+                over += Number(data.over);
 
 
         }
@@ -613,28 +664,27 @@ function count(){
 
 
 
-// 保存用日付
+
 function makeKey(date){
 
-return date.getFullYear()
-+"-"
-+(date.getMonth()+1)
-+"-"
-+date.getDate();
+    return date.getFullYear()
+    +"-"
+    +(date.getMonth()+1)
+    +"-"
+    +date.getDate();
 
 }
 
 
 
-// 表示用
 function format(date){
 
-return date.getFullYear()
-+"年"
-+(date.getMonth()+1)
-+"月"
-+date.getDate()
-+"日";
+    return date.getFullYear()
+    +"年"
+    +(date.getMonth()+1)
+    +"月"
+    +date.getDate()
+    +"日";
 
 }
 
